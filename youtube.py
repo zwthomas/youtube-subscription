@@ -28,6 +28,19 @@ def getAllChannels():
     return allSubs
 
 
+def getChannelsAndMostRecent():
+    conn = sqlite3.connect("youtube.db")
+    c = conn.cursor()
+    c.execute("SELECT channelId, mostRecentId FROM subs")
+
+    subInfo = {sub[0]: sub[1] for sub in c.fetchall()}
+
+    conn.commit()
+    conn.close()
+
+    return subInfo
+
+
 def fillMostRecentVids(allSubs):
     conn = sqlite3.connect('youtube.db')
     c = conn.cursor()
@@ -40,13 +53,37 @@ def fillMostRecentVids(allSubs):
         )
         response = request.execute()
         print(sub)
-        videos = [item["contentDetails"]["upload"]["videoId"] for item in response["items"] if "upload" in item["contentDetails"].keys()]
-        if len(videos) == 0: continue
+        videos = [item["contentDetails"]["upload"]["videoId"]
+                  for item in response["items"] if "upload" in item["contentDetails"].keys()]
+        if len(videos) == 0:
+            continue
         newestVideo = videos[0]
-        c.execute("UPDATE subs SET mostRecentId=? WHERE channelId=?", (newestVideo,sub))
-    
+        c.execute("UPDATE subs SET mostRecentId=? WHERE channelId=?",
+                  (newestVideo, sub))
+
     conn.commit()
     conn.close()
+
+
+def getNewVideosForSub(channelId, recentVideo):
+    request = youtube.activities().list(
+        part="snippet,contentDetails",
+        channelId=channelId,
+        maxResults=10
+    )
+
+    response = request.execute()
+
+    for item in response["items"]:
+        contentDetails = item["contentDetails"]
+        if "upload" in contentDetails.keys():
+            videoId = contentDetails["upload"]["videoId"]
+            if videoId != recentVideo:
+                print(videoId)
+            else:
+                break
+            
+    
 
 
 youtube = googleapiclient.discovery.build(
@@ -62,8 +99,9 @@ request = youtube.activities().list(
 )
 response = request.execute()
 
-allSubs = getAllChannels()
-fillMostRecentVids(allSubs)
+subInfo = getChannelsAndMostRecent()
+getNewVideosForSub(channelId, subInfo[channelId])
+
 
 # print(type(response))
 # print(response.keys())
