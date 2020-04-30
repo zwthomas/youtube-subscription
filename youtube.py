@@ -3,11 +3,13 @@ import googleapiclient.discovery
 import googleapiclient.errors
 import configparser
 import sqlite3
+import requests
+import json
 
 
 config = configparser.ConfigParser()
 config.read("youtube.ini")
-url = config["youtube"]["tech"]
+TECH = config["youtube"]["tech"]
 
 DEVELOPER_KEY = config["youtube"]["key"]
 api_service_name = "youtube"
@@ -73,16 +75,33 @@ def getNewVideosForSub(channelId, recentVideo):
     )
 
     response = request.execute()
-
+    newVideos = []
     for item in response["items"]:
         contentDetails = item["contentDetails"]
         if "upload" in contentDetails.keys():
             videoId = contentDetails["upload"]["videoId"]
             if videoId != recentVideo:
-                print(videoId)
+                newVideos.append(videoId)
             else:
-                break
-            
+                return newVideos
+    return newVideos
+
+def postInDiscord(newVideos, channelId):
+    conn = sqlite3.connect("youtube.db")
+    c = conn.cursor()
+
+    c.execute("SELECT category FROM subs WHERE channelId=?",(channelId,))
+    category = c.fetchone() 
+    url = config["youtube"][category[0]]
+
+
+    for video in newVideos:
+        data = {}
+        data["content"] = "https://www.youtube.com/watch?v=" + video
+        data["username"] = "custom username"
+
+        result = requests.post(url, data=json.dumps(data), headers={"Content-Type": "application/json"})
+
     
 
 
@@ -100,7 +119,10 @@ request = youtube.activities().list(
 response = request.execute()
 
 subInfo = getChannelsAndMostRecent()
-getNewVideosForSub(channelId, subInfo[channelId])
+newVideos = getNewVideosForSub(channelId, subInfo[channelId])
+if len(newVideos) > 0:
+    postInDiscord(newVideos, channelId)
+
 
 
 # print(type(response))
