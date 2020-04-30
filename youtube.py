@@ -86,23 +86,23 @@ def getNewVideosForSub(channelId, recentVideo):
                 return newVideos
     return newVideos
 
+
 def postInDiscord(newVideos, channelId):
     conn = sqlite3.connect("youtube.db")
     c = conn.cursor()
 
-    c.execute("SELECT category FROM subs WHERE channelId=?",(channelId,))
-    category = c.fetchone() 
+    c.execute("SELECT category FROM subs WHERE channelId=?", (channelId,))
+    category = c.fetchone()
+    if len(category[0]) == 0: return
     url = config["youtube"][category[0]]
-
 
     for video in newVideos:
         data = {}
         data["content"] = "https://www.youtube.com/watch?v=" + video
         data["username"] = "custom username"
 
-        result = requests.post(url, data=json.dumps(data), headers={"Content-Type": "application/json"})
-
-    
+        result = requests.post(url, data=json.dumps(data), headers={
+                               "Content-Type": "application/json"})
 
 
 youtube = googleapiclient.discovery.build(
@@ -119,9 +119,10 @@ request = youtube.activities().list(
 response = request.execute()
 
 subInfo = getChannelsAndMostRecent()
-newVideos = getNewVideosForSub(channelId, subInfo[channelId])
-if len(newVideos) > 0:
-    postInDiscord(newVideos, channelId)
+for sub in subInfo:
+    newVideos = getNewVideosForSub(sub, subInfo[sub])
+    if len(newVideos) > 0:
+        postInDiscord(newVideos, sub)
 
 
 
