@@ -1,5 +1,5 @@
 import os
-
+import sqlite3
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
@@ -8,10 +8,10 @@ import configparser
 scopes = ["https://www.googleapis.com/auth/youtube.readonly"]
 
 
-def main():
+def getAllSubs():
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
     config = configparser.ConfigParser()
-    config.read("youtube.ini")
+    config.read("../youtube.ini")
     
     DEVELOPER_KEY = config["youtube"]["key"]
     api_service_name = "youtube"
@@ -37,16 +37,25 @@ def main():
         for item in response["items"]:
             channelId = item["snippet"]["resourceId"]["channelId"]
             channelName = item["snippet"]["title"]
-            print(channelId)
             subs[channelId] = channelName
 
         if "nextPageToken" in response.keys():
             nextPageToken = response["nextPageToken"]
         else: 
             nextPageToken = None
-    
-    print(subs)
+    return subs
+
+def createDatabase(subs):
+    conn= sqlite3.connect("youtube.db")
+    c = conn.cursor()
+    c.execute("CREATE TABLE \"subs\" ( `channelId` TEXT, `channelName` TEXT, `category` TEXT, `mostRecentId` TEXT, PRIMARY KEY(`channelId`) )")
+    conn.commit()
+    conn.close()
+
+    return
 
 
 if __name__ == "__main__":
-    main()
+    subs = getAllSubs()
+    createDatabase(subs)
+    
