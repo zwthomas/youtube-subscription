@@ -48,7 +48,9 @@ def getAllSubs():
 def createDatabase(subs):
     conn= sqlite3.connect("youtube.db")
     c = conn.cursor()
-    c.execute("CREATE TABLE \"subs\" ( `channelId` TEXT, `channelName` TEXT, `category` TEXT, `mostRecentId` TEXT, PRIMARY KEY(`channelId`) )")
+    c.execute("CREATE TABLE subs ( `channelId` TEXT, `channelName` TEXT, `category` TEXT, `mostRecentId` TEXT, PRIMARY KEY(`channelId`) )")
+    for subId in subs:
+        c.execute("INSERT INTO subs (channelId, channelName) VALUES (?, ?)", (subId, subs[subId]))
     conn.commit()
     conn.close()
 
