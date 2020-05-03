@@ -54,7 +54,7 @@ class Youtube(YoutubeConfig):
         for video in newVideos[::-1]:
             data = {}
             data["content"] = "https://www.youtube.com/watch?v=" + video
-            data["username"] = "custom username"
+            data["username"] = "YoutubeBot"
 
             result = requests.post(url, data=json.dumps(data), headers={
                                 "Content-Type": "application/json"})
