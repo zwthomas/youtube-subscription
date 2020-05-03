@@ -1,25 +1,10 @@
-import os
 import sqlite3
 import google_auth_oauthlib.flow
-import googleapiclient.discovery
 import googleapiclient.errors
-import configparser
+from youtubeConfig import YoutubeConfig
 
 
-class YoutubeSetup():
-
-    api_service_name = "youtube"
-    api_version = "v3"
-
-    def __init__(self):
-        self.config = configparser.ConfigParser()
-        self.config.read("../youtube.ini")
-        self.DEVELOPER_KEY = self.config["youtube"]["key"]
-        self.youtube = googleapiclient.discovery.build(
-            self.api_service_name,
-            self.api_version,
-            developerKey=self.DEVELOPER_KEY
-        )
+class YoutubeSetup(YoutubeConfig):
 
     def getAllSubs(self):
         subs = {}
