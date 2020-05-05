@@ -74,11 +74,11 @@ class Youtube(YoutubeConfig):
     
     def run(self):
         while True:
-            subInfo = self.getChannelsAndMostRecent()
-            for sub in subInfo:
-                newVideos = self.getNewVideosForSub(sub, subInfo[sub])
-                if len(newVideos) > 0:
-                    self.postInDiscord(newVideos, sub)
+            #subInfo = self.getChannelsAndMostRecent()
+            #for sub in subInfo:
+             #   newVideos = self.getNewVideosForSub(sub, subInfo[sub])
+              #  if len(newVideos) > 0:
+               #     self.postInDiscord(newVideos, sub)
             time.sleep(7200) # Run once every two hours hopefully a better solution to come
 
 
