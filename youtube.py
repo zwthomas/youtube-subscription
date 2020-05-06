@@ -9,7 +9,7 @@ import time
 class Youtube(YoutubeConfig):
 
     def getChannelsAndMostRecent(self):
-        conn = sqlite3.connect("youtube.db")
+        conn = sqlite3.connect(self.dbPath)
         c = conn.cursor()
         c.execute("SELECT channelId, mostRecentId FROM subs")
 
@@ -43,7 +43,7 @@ class Youtube(YoutubeConfig):
     def postInDiscord(self, newVideos, channelId):
         self.updateMostRecent(newVideos[0], channelId)
 
-        conn = sqlite3.connect("youtube.db")
+        conn = sqlite3.connect(self.dbPath)
         c = conn.cursor()
 
         c.execute("SELECT category FROM subs WHERE channelId=?", (channelId,))
@@ -63,7 +63,7 @@ class Youtube(YoutubeConfig):
         conn.close()
     
     def updateMostRecent(self, newVideo, channelId):
-        conn = sqlite3.connect("youtube.db")
+        conn = sqlite3.connect(self.dbPath)
         c = conn.cursor()
 
         c.execute("UPDATE subs SET mostRecentId=? WHERE channelId=?", (newVideo, channelId))
@@ -79,7 +79,7 @@ class Youtube(YoutubeConfig):
                 newVideos = self.getNewVideosForSub(sub, subInfo[sub])
                 if len(newVideos) > 0:
                     self.postInDiscord(newVideos, sub)
-            time.sleep(7200) # Run once every two hours hopefully a better solution to come
+            time.sleep(14400) # Run once every four hours hopefully a better solution to come
 
 
 if __name__ == "__main__":
