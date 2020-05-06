@@ -2,7 +2,7 @@ FROM python:3
 
 WORKDIR /usr/src/app
 
-COPY . .
+RUN git clone https://github.com/zwthomas/youtube-subscription.git ./
 
 RUN pip install --upgrade google-api-python-client google-auth-oauthlib google-auth-httplib2
 
